@@ -1,0 +1,145 @@
+@model IEnumerable<DeploymentManager.Web.Models.Server>
+
+@{
+    ViewData["Title"] = "Target Servers";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1 text-gradient">Registered Servers</h2>
+        <p class="text-secondary-light mb-0 fs-6">Manage deployment environments and check agent agent statuses.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary-gradient d-flex align-items-center gap-2">
+        <i class="bi bi-plus-circle-fill fs-6"></i> Add Target Server
+    </a>
+</div>
+
+<div class="card card-glass p-4">
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5 border border-secondary border-opacity-10 rounded bg-black bg-opacity-20">
+            <i class="bi bi-hdd-network text-muted" style="font-size: 3.5rem;"></i>
+            <h5 class="text-white fw-bold mt-3">No Servers Found</h5>
+            <p class="text-secondary-light fs-7 max-w-md mx-auto mt-2">
+                Get started by registering a remote server agent. Ensure the deployment agent API is running on the host target.
+            </p>
+            <a asp-action="Create" class="btn btn-primary-gradient mt-3">Add Target Server</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-dark-custom align-middle">
+                <thead>
+                    <tr>
+                        <th>Server details</th>
+                        <th>IIS configuration</th>
+                        <th>Admin user</th>
+                        <th>Agent endpoint</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr id="server-row-@item.Id">
+                            <td>
+                                <div class="fw-bold text-white fs-6">@item.Name</div>
+                                <span class="fs-7 text-secondary-light">
+                                    <i class="bi bi-pc-display me-1 text-secondary"></i> @item.IpAddress 
+                                    @if (!string.IsNullOrEmpty(item.Domain))
+                                    {
+                                        <span> | @item.Domain</span>
+                                    }
+                                    @if (item.Port.HasValue)
+                                    {
+                                        <span>:@item.Port</span>
+                                    }
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary bg-opacity-35 text-white border border-secondary border-opacity-10 py-1 px-2">
+                                    <i class="bi bi-folder-symlink-fill me-1 text-primary"></i> Site: @item.IisSiteName
+                                </span>
+                            </td>
+                            <td class="text-secondary-light fs-7">
+                                <code>@item.AdminUsername</code>
+                            </td>
+                            <td>
+                                <a href="@item.ApiBaseUrl" target="_blank" class="text-info text-decoration-none fs-7">
+                                    @item.ApiBaseUrl
+                                </a>
+                            </td>
+                            <td>
+                                <span id="server-status-@item.Id" class="badge @(item.Status == "Active" ? "badge-success-glow" : "badge-danger-glow") px-2 py-1 fs-8">
+                                    @item.Status
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button class="btn btn-sm btn-outline-info px-3 py-1 fs-8 test-connection-btn" data-id="@item.Id">
+                                        <i class="bi bi-wifi"></i> Test Connect
+                                    </button>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning px-3 py-1 fs-8">
+                                        <i class="bi bi-pencil-fill"></i> Edit
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger px-3 py-1 fs-8">
+                                        <i class="bi bi-trash-fill"></i> Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script>
+    $(document).ready(function() {
+        $(".test-connection-btn").click(function() {
+            const serverId = $(this).data("id");
+            const btn = $(this);
+            
+            // Disable and spin
+            btn.prop("disabled", true).html('<span class="spinner-border spinner-border-sm me-1"></span> Pinging...');
+
+            $.ajax({
+                url: '/Servers/TestConnection',
+                type: 'POST',
+                data: { id: serverId },
+                success: function(response) {
+                    btn.prop("disabled", false).html('<i class="bi bi-wifi"></i> Test Connect');
+                    
+                    const badge = $(`#server-status-${serverId}`);
+                    if (response.success) {
+                        badge.removeClass("badge-danger-glow").addClass("badge-success-glow").text("Active");
+                        
+                        // Briefly flash row green
+                        $(`#server-row-${serverId}`).addClass("bg-success bg-opacity-10");
+                        setTimeout(() => {
+                            $(`#server-row-${serverId}`).removeClass("bg-success bg-opacity-10");
+                        }, 1000);
+                    } else {
+                        badge.removeClass("badge-success-glow").addClass("badge-danger-glow").text("Inactive");
+                        
+                        // Briefly flash row red
+                        $(`#server-row-${serverId}`).addClass("bg-danger bg-opacity-10");
+                        setTimeout(() => {
+                            $(`#server-row-${serverId}`).removeClass("bg-danger bg-opacity-10");
+                        }, 1000);
+                        alert("Health check call failed. Make sure the agent is running and your API Key / Base URL is correct.");
+                    }
+                },
+                error: function() {
+                    btn.prop("disabled", false).html('<i class="bi bi-wifi"></i> Test Connect');
+                    alert("System communication failure testing server connection.");
+                }
+            });
+        });
+    });
+</script>
+}

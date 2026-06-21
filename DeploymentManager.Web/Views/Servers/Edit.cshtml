@@ -1,0 +1,111 @@
+@model DeploymentManager.Web.Models.Server
+
+@{
+    ViewData["Title"] = "Edit Target Server";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="d-flex align-items-center gap-2 mb-4">
+            <a asp-action="Index" class="btn btn-outline-secondary border-secondary border-opacity-25 px-2 py-1 fs-7 rounded-circle text-secondary-light">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div>
+                <h2 class="fw-bold mb-1 text-gradient">Edit Server</h2>
+                <p class="text-secondary-light mb-0 fs-6">Update credentials, IIS mappings, or deployment agent endpoints.</p>
+            </div>
+        </div>
+
+        <div class="card card-glass p-4">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CreatedAt" />
+
+                <h5 class="text-white border-bottom border-secondary border-opacity-10 pb-2 mb-3"><i class="bi bi-info-circle-fill me-2 text-primary"></i>General Identification</h5>
+                
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="Name" class="form-label"></label>
+                        <input asp-for="Name" class="form-control" required />
+                        <span asp-validation-for="Name" class="text-danger fs-8"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Status" class="form-label"></label>
+                        <select asp-for="Status" class="form-select">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                        <span asp-validation-for="Status" class="text-danger fs-8"></span>
+                    </div>
+                </div>
+
+                <h5 class="text-white border-bottom border-secondary border-opacity-10 pb-2 mb-3"><i class="bi bi-hdd-network-fill me-2 text-primary"></i>Network & IIS Host Settings</h5>
+                
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="IpAddress" class="form-label"></label>
+                        <input asp-for="IpAddress" class="form-control" required />
+                        <span asp-validation-for="IpAddress" class="text-danger fs-8"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Domain" class="form-label"></label>
+                        <input asp-for="Domain" class="form-control" placeholder="e.g. app.domain.com (optional)" />
+                        <span asp-validation-for="Domain" class="text-danger fs-8"></span>
+                    </div>
+                    <div class="col-md-8">
+                        <label asp-for="IisSiteName" class="form-label"></label>
+                        <input asp-for="IisSiteName" class="form-control" required />
+                        <span asp-validation-for="IisSiteName" class="text-danger fs-8"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Port" class="form-label"></label>
+                        <input asp-for="Port" type="number" class="form-control" placeholder="e.g. 80 (optional)" />
+                        <span asp-validation-for="Port" class="text-danger fs-8"></span>
+                    </div>
+                </div>
+
+                <h5 class="text-white border-bottom border-secondary border-opacity-10 pb-2 mb-3"><i class="bi bi-shield-lock-fill me-2 text-primary"></i>Server Admin Credentials</h5>
+                
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="AdminUsername" class="form-label"></label>
+                        <input asp-for="AdminUsername" class="form-control" required />
+                        <span asp-validation-for="AdminUsername" class="text-danger fs-8"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="AdminPasswordEncrypted" class="form-label">Admin Password</label>
+                        <input asp-for="AdminPasswordEncrypted" type="password" class="form-control" required />
+                        <span asp-validation-for="AdminPasswordEncrypted" class="text-danger fs-8"></span>
+                    </div>
+                </div>
+
+                <h5 class="text-white border-bottom border-secondary border-opacity-10 pb-2 mb-3"><i class="bi bi-terminal-fill me-2 text-primary"></i>Agent Deployment API Settings</h5>
+                
+                <div class="row g-3 mb-4">
+                    <div class="col-md-8">
+                        <label asp-for="ApiBaseUrl" class="form-label"></label>
+                        <input asp-for="ApiBaseUrl" type="url" class="form-control" required />
+                        <span asp-validation-for="ApiBaseUrl" class="text-danger fs-8"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="ApiKey" class="form-label"></label>
+                        <input asp-for="ApiKey" class="form-control" required />
+                        <span asp-validation-for="ApiKey" class="text-danger fs-8"></span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-3 mt-4 pt-2 border-top border-secondary border-opacity-10">
+                    <a asp-action="Index" class="btn btn-outline-secondary border-secondary border-opacity-25 px-4 py-2 text-secondary-light">Cancel</a>
+                    <button type="submit" class="btn btn-primary-gradient px-4 py-2">
+                        <i class="bi bi-save-fill me-1"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
