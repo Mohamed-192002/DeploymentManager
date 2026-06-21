@@ -17,15 +17,10 @@ namespace DeploymentManager.Web.Models
         [Display(Name = "IP Address")]
         public string IpAddress { get; set; } = string.Empty;
 
-        [StringLength(100)]
-        public string Domain { get; set; } = string.Empty;
-
         [Required]
         [StringLength(100)]
         [Display(Name = "IIS Site Name")]
         public string IisSiteName { get; set; } = string.Empty;
-
-        public int? Port { get; set; }
 
         [Required]
         [StringLength(100)]
@@ -37,7 +32,7 @@ namespace DeploymentManager.Web.Models
         public string AdminPasswordEncrypted { get; set; } = string.Empty;
 
         [Required]
-        [Url]
+       // [Url]
         [Display(Name = "API Base URL")]
         public string ApiBaseUrl { get; set; } = string.Empty;
 
@@ -45,6 +40,18 @@ namespace DeploymentManager.Web.Models
         [StringLength(100)]
         [Display(Name = "API Key")]
         public string ApiKey { get; set; } = string.Empty;
+
+        [Required]
+        [Display(Name = "Target Directory")]
+        public string TargetDirectory { get; set; } = string.Empty;
+
+        [Required]
+        [StringLength(100)]
+        [Display(Name = "IIS App Pool Name")]
+        public string IisAppPoolName { get; set; } = string.Empty;
+
+        [Display(Name = "Simulate IIS")]
+        public bool SimulateIis { get; set; } = false;
 
         [Required]
         [StringLength(20)]

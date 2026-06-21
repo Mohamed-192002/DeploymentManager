@@ -43,16 +43,11 @@ namespace DeploymentManager.Web.Controllers
 
         // POST: Dashboard/Deploy
         [HttpPost]
-        public async Task<IActionResult> Deploy(List<Guid> serverIds, string version, string packageUrl)
+        public async Task<IActionResult> Deploy(List<Guid> serverIds, string packageUrl)
         {
             if (serverIds == null || !serverIds.Any())
             {
                 return Json(new { success = false, message = "Please select at least one server." });
-            }
-
-            if (string.IsNullOrWhiteSpace(version))
-            {
-                return Json(new { success = false, message = "Please specify a deployment version." });
             }
 
             if (string.IsNullOrWhiteSpace(packageUrl))
@@ -63,7 +58,7 @@ namespace DeploymentManager.Web.Controllers
             try
             {
                 // Trigger background deployment
-                var deploymentIds = await _deploymentService.TriggerDeploymentsAsync(serverIds, version, packageUrl);
+                var deploymentIds = await _deploymentService.TriggerDeploymentsAsync(serverIds, packageUrl);
 
                 // Fetch details of created deployments to return to client
                 var deployments = await _context.Deployments
@@ -74,7 +69,6 @@ namespace DeploymentManager.Web.Controllers
                         deploymentId = d.Id.ToString(),
                         serverId = d.ServerId.ToString(),
                         serverName = d.Server != null ? d.Server.Name : "Unknown",
-                        version = d.Version,
                         status = d.Status,
                         startedAt = d.StartedAt.ToString("yyyy-MM-dd HH:mm:ss")
                     })

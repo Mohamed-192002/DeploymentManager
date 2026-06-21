@@ -1,15 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.IO.Compression;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Web.Administration;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,12 +37,11 @@ app.MapPost("/api/deploy", async (DeployRequest request, HttpContext context, IH
     var start = DateTime.UtcNow;
     logs.Add($"[Info] Started deployment at {start} UTC");
     logs.Add($"[Info] Server ID: {request.ServerId}");
-    logs.Add($"[Info] Version: {request.Version}");
     logs.Add($"[Info] Package URL: {request.PackageUrl}");
 
-    string targetDirectory = cfg.GetValue<string>("DeploymentConfig:TargetDirectory") ?? @"D:\New folder\MockDeployDirectory";
-    string appPoolName = cfg.GetValue<string>("DeploymentConfig:IisAppPoolName") ?? "DefaultAppPool";
-    bool simulateIis = cfg.GetValue<bool>("DeploymentConfig:SimulateIIS");
+    string targetDirectory = request.TargetDirectory ?? cfg.GetValue<string>("DeploymentConfig:TargetDirectory") ?? @"D:\New folder\MockDeployDirectory";
+    string appPoolName = request.IisAppPoolName ?? cfg.GetValue<string>("DeploymentConfig:IisAppPoolName") ?? "DefaultAppPool";
+    bool simulateIis = request.SimulateIis ?? cfg.GetValue<bool>("DeploymentConfig:SimulateIIS");
 
     string tempZipPath = Path.Combine(Path.GetTempPath(), $"deploy_{Guid.NewGuid()}.zip");
     string tempExtractPath = Path.Combine(Path.GetTempPath(), $"extract_{Guid.NewGuid()}");
@@ -96,8 +84,8 @@ app.MapPost("/api/deploy", async (DeployRequest request, HttpContext context, IH
                 {
                     Directory.CreateDirectory(backupDir);
                 }
-                string backupPath = Path.Combine(backupDir, $"backup_{request.Version}_{DateTime.UtcNow:yyyyMMddHHmmss}.zip");
-                logs.Add($"[Info] Backing up current version to {backupPath}...");
+                string backupPath = Path.Combine(backupDir, $"backup_{DateTime.UtcNow:yyyyMMddHHmmss}.zip");
+                logs.Add($"[Info] Backing up current files to {backupPath}...");
                 ZipFile.CreateFromDirectory(targetDirectory, backupPath);
                 logs.Add($"[Info] Backup completed successfully.");
             }
@@ -303,5 +291,5 @@ static async ValueTask<object?> ApiKeyFilter(EndpointFilterInvocationContext con
 }
 
 // Request & Response Records
-public record DeployRequest(string ServerId, string Version, string PackageUrl);
+public record DeployRequest(string ServerId, string PackageUrl, string? TargetDirectory, string? IisAppPoolName, bool? SimulateIis);
 public record DeploymentResponse(bool Success, string Message, List<string> Logs);

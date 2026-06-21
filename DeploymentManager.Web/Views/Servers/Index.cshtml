@@ -48,14 +48,6 @@
                                 <div class="fw-bold text-white fs-6">@item.Name</div>
                                 <span class="fs-7 text-secondary-light">
                                     <i class="bi bi-pc-display me-1 text-secondary"></i> @item.IpAddress 
-                                    @if (!string.IsNullOrEmpty(item.Domain))
-                                    {
-                                        <span> | @item.Domain</span>
-                                    }
-                                    @if (item.Port.HasValue)
-                                    {
-                                        <span>:@item.Port</span>
-                                    }
                                 </span>
                             </td>
                             <td>

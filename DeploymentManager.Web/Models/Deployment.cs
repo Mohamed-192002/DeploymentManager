@@ -14,10 +14,6 @@ namespace DeploymentManager.Web.Models
         public virtual Server? Server { get; set; }
 
         [Required]
-        [StringLength(50)]
-        public string Version { get; set; } = string.Empty;
-
-        [Required]
         [Url]
         [StringLength(500)]
         [Display(Name = "Package URL")]

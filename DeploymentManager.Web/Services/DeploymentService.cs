@@ -17,7 +17,7 @@ namespace DeploymentManager.Web.Services
 {
     public interface IDeploymentService
     {
-        Task<List<Guid>> TriggerDeploymentsAsync(List<Guid> serverIds, string version, string packageUrl);
+        Task<List<Guid>> TriggerDeploymentsAsync(List<Guid> serverIds, string packageUrl);
         Task<bool> TestConnectionAsync(Guid serverId);
     }
 
@@ -40,7 +40,7 @@ namespace DeploymentManager.Web.Services
             _logger = logger;
         }
 
-        public async Task<List<Guid>> TriggerDeploymentsAsync(List<Guid> serverIds, string version, string packageUrl)
+        public async Task<List<Guid>> TriggerDeploymentsAsync(List<Guid> serverIds, string packageUrl)
         {
             using var scope = _scopeFactory.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -54,7 +54,6 @@ namespace DeploymentManager.Web.Services
                 {
                     Id = Guid.NewGuid(),
                     ServerId = serverId,
-                    Version = version,
                     PackageUrl = packageUrl,
                     Status = "Pending",
                     StartedAt = DateTime.UtcNow
@@ -165,8 +164,10 @@ namespace DeploymentManager.Web.Services
                 var payload = new
                 {
                     serverId = deployment.ServerId.ToString(),
-                    version = deployment.Version,
-                    packageUrl = deployment.PackageUrl
+                    packageUrl = deployment.PackageUrl,
+                    targetDirectory = deployment.Server.TargetDirectory,
+                    iisAppPoolName = deployment.Server.IisAppPoolName,
+                    simulateIis = deployment.Server.SimulateIis
                 };
 
                 var json = JsonSerializer.Serialize(payload);

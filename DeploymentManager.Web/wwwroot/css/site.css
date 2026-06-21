@@ -261,3 +261,105 @@ body.dark-theme {
 .stat-icon.active { background-color: var(--color-success-glow); color: var(--color-success); }
 .stat-icon.success { background-color: var(--color-info-glow); color: var(--color-info); }
 .stat-icon.failed { background-color: var(--color-danger-glow); color: var(--color-danger); }
+
+/* Premium Server Selection Cards */
+.server-select-list {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(99, 102, 241, 0.2) rgba(255, 255, 255, 0.02);
+}
+
+.server-select-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.server-select-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.01);
+    border-radius: 8px;
+}
+
+.server-select-list::-webkit-scrollbar-thumb {
+    background-color: rgba(99, 102, 241, 0.2);
+    border-radius: 8px;
+}
+
+.server-select-list::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(99, 102, 241, 0.4);
+}
+
+.server-option-item {
+    position: relative;
+    margin: 0;
+}
+
+.server-checkbox-label {
+    margin: 0;
+    cursor: pointer;
+}
+
+.server-checkbox-card {
+    border-radius: 12px;
+    border: 1px solid var(--border-glass) !important;
+    background: rgba(255, 255, 255, 0.01) !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.server-checkbox-card:hover {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-color: rgba(99, 102, 241, 0.35) !important;
+    box-shadow: 0 4px 12px 0 rgba(99, 102, 241, 0.05);
+}
+
+.server-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    transition: all 0.25s ease;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.server-checkbox-card:hover .server-icon-wrapper {
+    color: var(--color-primary);
+    background: rgba(99, 102, 241, 0.08);
+    border-color: rgba(99, 102, 241, 0.2);
+}
+
+/* Custom indicator checkbox styling */
+.custom-check-indicator {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s ease;
+    color: transparent;
+    font-size: 0.8rem;
+    background: transparent;
+}
+
+/* Selected state styling */
+.server-checkbox-input:checked + .server-checkbox-label .server-checkbox-card {
+    border-color: var(--color-primary) !important;
+    background: rgba(99, 102, 241, 0.06) !important;
+    box-shadow: 0 0 15px 0 rgba(99, 102, 241, 0.1);
+}
+
+.server-checkbox-input:checked + .server-checkbox-label .server-checkbox-card .server-icon-wrapper {
+    color: #fff;
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.server-checkbox-input:checked + .server-checkbox-label .server-checkbox-card .custom-check-indicator {
+    border-color: var(--color-primary);
+    background: var(--color-primary);
+    color: #fff;
+}
