@@ -1,18 +1,18 @@
 @model DeploymentManager.Web.Models.Server
 
 @{
-    ViewData["Title"] = "Add Target Server";
+    ViewData["Title"] = "تسجيل سيرفر جديد";
 }
 
 <div class="row justify-content-center">
     <div class="col-lg-8">
         <div class="d-flex align-items-center gap-2 mb-4">
             <a asp-action="Index" class="btn btn-outline-secondary border-secondary border-opacity-25 px-2 py-1 fs-7 rounded-circle text-secondary-light">
-                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
             </a>
             <div>
-                <h2 class="fw-bold mb-1 text-gradient">Register Server</h2>
-                <p class="text-secondary-light mb-0 fs-6">Configure target credentials, IIS mapping, and API endpoints.</p>
+                <h2 class="fw-bold mb-1 text-gradient">تسجيل سيرفر جديد</h2>
+                <p class="text-secondary-light mb-0 fs-6">قم بتهيئة بيانات السيرفر المستهدف، ربط موقع IIS، وإعدادات كود الوكيل (Agent).</p>
             </div>
         </div>
 
@@ -20,83 +20,83 @@
             <form asp-action="Create">
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                <h5 class="text-white border-bottom border-secondary border-opacity-10 pb-2 mb-3"><i class="bi bi-info-circle-fill me-2 text-primary"></i>General Identification</h5>
+                <h5 class="text-white border-bottom border-secondary border-opacity-10 pb-2 mb-3"><i class="bi bi-info-circle-fill me-2 text-primary"></i>التعريف العام بالسيرفر</h5>
                 
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
-                        <label asp-for="Name" class="form-label"></label>
-                        <input asp-for="Name" class="form-control" placeholder="e.g. Production Web-01" required />
+                        <label class="form-label">اسم السيرفر</label>
+                        <input asp-for="Name" class="form-control" placeholder="مثال: خادم الإنتاج الرئيسي" required />
                         <span asp-validation-for="Name" class="text-danger fs-8"></span>
                     </div>
                     <div class="col-md-6">
-                        <label asp-for="Status" class="form-label"></label>
+                        <label class="form-label">الحالة</label>
                         <select asp-for="Status" class="form-select">
-                            <option value="Active">Active</option>
-                            <option value="Inactive">Inactive</option>
+                            <option value="Active">نشط</option>
+                            <option value="Inactive">غير نشط</option>
                         </select>
                         <span asp-validation-for="Status" class="text-danger fs-8"></span>
                     </div>
                 </div>
 
-                <h5 class="text-white border-bottom border-secondary border-opacity-10 pb-2 mb-3"><i class="bi bi-hdd-network-fill me-2 text-primary"></i>Network & IIS Host Settings</h5>
+                <h5 class="text-white border-bottom border-secondary border-opacity-10 pb-2 mb-3"><i class="bi bi-hdd-network-fill me-2 text-primary"></i>إعدادات الشبكة وموقع IIS</h5>
                 
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
-                        <label asp-for="IpAddress" class="form-label"></label>
-                        <input asp-for="IpAddress" class="form-control" placeholder="e.g. 192.168.10.15" required />
+                        <label class="form-label">عنوان الـ IP</label>
+                        <input asp-for="IpAddress" class="form-control" placeholder="مثال: 192.168.1.100" required />
                         <span asp-validation-for="IpAddress" class="text-danger fs-8"></span>
                     </div>
                     <div class="col-md-6">
-                        <label asp-for="Domain" class="form-label"></label>
-                        <input asp-for="Domain" class="form-control" placeholder="e.g. app.domain.com (optional)" />
+                        <label class="form-label">اسم النطاق (Domain)</label>
+                        <input asp-for="Domain" class="form-control" placeholder="مثال: app.mywebsite.com (اختياري)" />
                         <span asp-validation-for="Domain" class="text-danger fs-8"></span>
                     </div>
                     <div class="col-md-8">
-                        <label asp-for="IisSiteName" class="form-label"></label>
-                        <input asp-for="IisSiteName" class="form-control" placeholder="e.g. Default Web Site" required />
+                        <label class="form-label">اسم موقع الـ IIS</label>
+                        <input asp-for="IisSiteName" class="form-control" placeholder="مثال: Default Web Site" required />
                         <span asp-validation-for="IisSiteName" class="text-danger fs-8"></span>
                     </div>
                     <div class="col-md-4">
-                        <label asp-for="Port" class="form-label"></label>
-                        <input asp-for="Port" type="number" class="form-control" placeholder="e.g. 80 (optional)" />
+                        <label class="form-label">المنفذ (Port)</label>
+                        <input asp-for="Port" type="number" class="form-control" placeholder="مثال: 80 (اختياري)" />
                         <span asp-validation-for="Port" class="text-danger fs-8"></span>
                     </div>
                 </div>
 
-                <h5 class="text-white border-bottom border-secondary border-opacity-10 pb-2 mb-3"><i class="bi bi-shield-lock-fill me-2 text-primary"></i>Server Admin Credentials</h5>
+                <h5 class="text-white border-bottom border-secondary border-opacity-10 pb-2 mb-3"><i class="bi bi-shield-lock-fill me-2 text-primary"></i>بيانات حساب المسؤول (Windows Admin)</h5>
                 
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
-                        <label asp-for="AdminUsername" class="form-label"></label>
-                        <input asp-for="AdminUsername" class="form-control" placeholder="e.g. Administrator" required />
+                        <label class="form-label">اسم المستخدم</label>
+                        <input asp-for="AdminUsername" class="form-control" placeholder="مثال: Administrator" required />
                         <span asp-validation-for="AdminUsername" class="text-danger fs-8"></span>
                     </div>
                     <div class="col-md-6">
-                        <label asp-for="AdminPasswordEncrypted" class="form-label">Admin Password</label>
+                        <label class="form-label">كلمة المرور</label>
                         <input asp-for="AdminPasswordEncrypted" type="password" class="form-control" placeholder="••••••••" required />
                         <span asp-validation-for="AdminPasswordEncrypted" class="text-danger fs-8"></span>
                     </div>
                 </div>
 
-                <h5 class="text-white border-bottom border-secondary border-opacity-10 pb-2 mb-3"><i class="bi bi-terminal-fill me-2 text-primary"></i>Agent Deployment API Settings</h5>
+                <h5 class="text-white border-bottom border-secondary border-opacity-10 pb-2 mb-3"><i class="bi bi-terminal-fill me-2 text-primary"></i>إعدادات الـ Agent API الخاص بالنشر</h5>
                 
                 <div class="row g-3 mb-4">
                     <div class="col-md-8">
-                        <label asp-for="ApiBaseUrl" class="form-label"></label>
-                        <input asp-for="ApiBaseUrl" type="url" class="form-control" placeholder="e.g. http://192.168.10.15:5000" required />
+                        <label class="form-label">رابط الـ API للوكيل (Base URL)</label>
+                        <input asp-for="ApiBaseUrl" type="url" class="form-control" placeholder="مثال: http://192.168.1.100:5297" required dir="ltr" />
                         <span asp-validation-for="ApiBaseUrl" class="text-danger fs-8"></span>
                     </div>
                     <div class="col-md-4">
-                        <label asp-for="ApiKey" class="form-label"></label>
-                        <input asp-for="ApiKey" class="form-control" placeholder="e.g. SecretAgentApiKey12345" required />
+                        <label class="form-label">مفتاح الوصول (API Key)</label>
+                        <input asp-for="ApiKey" class="form-control" placeholder="مثال: SecretAgentApiKey12345" required />
                         <span asp-validation-for="ApiKey" class="text-danger fs-8"></span>
                     </div>
                 </div>
 
                 <div class="d-flex justify-content-end gap-3 mt-4 pt-2 border-top border-secondary border-opacity-10">
-                    <a asp-action="Index" class="btn btn-outline-secondary border-secondary border-opacity-25 px-4 py-2 text-secondary-light">Cancel</a>
+                    <a asp-action="Index" class="btn btn-outline-secondary border-secondary border-opacity-25 px-4 py-2 text-secondary-light">إلغاء</a>
                     <button type="submit" class="btn btn-primary-gradient px-4 py-2">
-                        <i class="bi bi-check-circle-fill me-1"></i> Register Server
+                        <i class="bi bi-check-circle-fill me-1"></i> تسجيل السيرفر
                     </button>
                 </div>
             </form>
