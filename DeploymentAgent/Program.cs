@@ -57,47 +57,71 @@ app.MapPost("/api/deploy", async (DeployRequest request, HttpContext context, IH
 
         // 2. Download package
         logs.Add($"[Info] Downloading deployment package from {request.PackageUrl}...");
-        using (var client = httpClientFactory.CreateClient())
-        {
-            using (var response = await client.GetAsync(request.PackageUrl, HttpCompletionOption.ResponseHeadersRead))
-            {
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new Exception($"Failed to download package. HTTP Status: {response.StatusCode}");
-                }
-                using (var fileStream = new FileStream(tempZipPath, FileMode.Create, FileAccess.Write, FileShare.None))
-                {
-                    await response.Content.CopyToAsync(fileStream);
-                }
-            }
-        }
-        logs.Add($"[Info] Download complete. Temp zip saved at {tempZipPath}");
+		if (request.PackageUrl.StartsWith("file://", StringComparison.OrdinalIgnoreCase))
+		{
+			var localPath = new Uri(request.PackageUrl).LocalPath;
+			logs.Add($"[Info] Copying package from file path: {localPath}");
+			File.Copy(localPath, tempZipPath, overwrite: true);
+		}
+		else
+		{
+			using var client = httpClientFactory.CreateClient();
+			using var response = await client.GetAsync(
+				request.PackageUrl,
+				HttpCompletionOption.ResponseHeadersRead
+			);
+
+			response.EnsureSuccessStatusCode();
+
+			using var fileStream = new FileStream(
+				tempZipPath,
+				FileMode.Create,
+				FileAccess.Write
+			);
+
+			await response.Content.CopyToAsync(fileStream);
+		}
+		//using (var client = httpClientFactory.CreateClient())
+		//      {
+		//          using (var response = await client.GetAsync(request.PackageUrl, HttpCompletionOption.ResponseHeadersRead))
+		//          {
+		//              if (!response.IsSuccessStatusCode)
+		//              {
+		//                  throw new Exception($"Failed to download package. HTTP Status: {response.StatusCode}");
+		//              }
+		//              using (var fileStream = new FileStream(tempZipPath, FileMode.Create, FileAccess.Write, FileShare.None))
+		//              {
+		//                  await response.Content.CopyToAsync(fileStream);
+		//              }
+		//          }
+		//      }
+		logs.Add($"[Info] Download complete. Temp zip saved at {tempZipPath}");
 
         // 3. Backup current version (Optional)
-        try
-        {
-            var filesInTarget = Directory.GetFiles(targetDirectory, "*", SearchOption.AllDirectories);
-            if (filesInTarget.Length > 0)
-            {
-                string backupDir = Path.Combine(Directory.GetParent(targetDirectory)?.FullName ?? targetDirectory, "backups");
-                if (!Directory.Exists(backupDir))
-                {
-                    Directory.CreateDirectory(backupDir);
-                }
-                string backupPath = Path.Combine(backupDir, $"backup_{DateTime.UtcNow:yyyyMMddHHmmss}.zip");
-                logs.Add($"[Info] Backing up current files to {backupPath}...");
-                ZipFile.CreateFromDirectory(targetDirectory, backupPath);
-                logs.Add($"[Info] Backup completed successfully.");
-            }
-            else
-            {
-                logs.Add("[Info] Target folder is empty. Skipping backup.");
-            }
-        }
-        catch (Exception ex)
-        {
-            logs.Add($"[Warning] Backup failed: {ex.Message}. Continuing with deployment.");
-        }
+        //try
+        //{
+        //    var filesInTarget = Directory.GetFiles(targetDirectory, "*", SearchOption.AllDirectories);
+        //    if (filesInTarget.Length > 0)
+        //    {
+        //        string backupDir = Path.Combine(Directory.GetParent(targetDirectory)?.FullName ?? targetDirectory, "backups");
+        //        if (!Directory.Exists(backupDir))
+        //        {
+        //            Directory.CreateDirectory(backupDir);
+        //        }
+        //        string backupPath = Path.Combine(backupDir, $"backup_{DateTime.UtcNow:yyyyMMddHHmmss}.zip");
+        //        logs.Add($"[Info] Backing up current files to {backupPath}...");
+        //        ZipFile.CreateFromDirectory(targetDirectory, backupPath);
+        //        logs.Add($"[Info] Backup completed successfully.");
+        //    }
+        //    else
+        //    {
+        //        logs.Add("[Info] Target folder is empty. Skipping backup.");
+        //    }
+        //}
+        //catch (Exception ex)
+        //{
+        //    logs.Add($"[Warning] Backup failed: {ex.Message}. Continuing with deployment.");
+        //}
 
         // 4. Stop IIS App Pool
         if (simulateIis)
