@@ -273,6 +273,16 @@
     $(document).ready(function() {
         let activeDeployments = {}; 
         let selectedDeploymentIdForConsole = null;
+        let runningDeploymentIds = new Set();
+        let completedDeploymentIds = new Set();
+
+        function updateDeployButtonState() {
+            if (runningDeploymentIds.size > 0) {
+                $("#btnDeploy").prop("disabled", true).html('<span class="spinner-border spinner-border-sm me-2"></span> جاري النشر...');
+            } else {
+                $("#btnDeploy").prop("disabled", false).html('<i class="bi bi-rocket-takeoff-fill me-2 fs-5"></i> تنفيذ النشر المتوازي');
+            }
+        }
 
         // الاتصال بـ SignalR Hub
         let connection = null;
@@ -325,6 +335,9 @@
                         const statusText = data.status === "Success" ? "نجاح العملية" : "فشل العملية";
                         appendLogLine(`[النظام] انتهت عملية النشر للسيرفر: ${statusText}`, new Date().toISOString(), data.status === "Failed");
                     }
+                    completedDeploymentIds.add(data.deploymentId);
+                    runningDeploymentIds.delete(data.deploymentId);
+                    updateDeployButtonState();
                 }
             });
         } else {
@@ -361,6 +374,10 @@
                     if (isCompleted) {
                         clearInterval(pollingIntervals[deploymentId]);
                         delete pollingIntervals[deploymentId];
+
+                        completedDeploymentIds.add(deploymentId);
+                        runningDeploymentIds.delete(deploymentId);
+                        updateDeployButtonState();
 
                         // تحديث الشارات مرئياً
                         const statusCell = $(`.status-badge-${deploymentId}`);
@@ -414,9 +431,14 @@
                     packageUrl: packageUrl
                 },
                 success: function(response) {
-                    $("#btnDeploy").prop("disabled", false).html('<i class="bi bi-rocket-takeoff-fill me-2 fs-5"></i> تنفيذ النشر المتوازي');
-                    
                     if (response.success) {
+                        response.deployments.forEach(function(dep) {
+                            if (!completedDeploymentIds.has(dep.deploymentId)) {
+                                runningDeploymentIds.add(dep.deploymentId);
+                            }
+                        });
+                        updateDeployButtonState();
+
                         $("#activeRunPanel").removeClass("d-none");
                         $("#activeRunTableBody").empty();
 
@@ -477,11 +499,12 @@
                             $("#historyTableBody").prepend(histRow);
                         });
                     } else {
+                        updateDeployButtonState();
                         alert("فشل تشغيل عملية النشر: " + response.message);
                     }
                 },
                 error: function(err) {
-                    $("#btnDeploy").prop("disabled", false).html('<i class="bi bi-rocket-takeoff-fill me-2 fs-5"></i> تنفيذ النشر المتوازي');
+                    updateDeployButtonState();
                     alert("حدث خطأ أثناء التواصل مع النظام.");
                 }
             });

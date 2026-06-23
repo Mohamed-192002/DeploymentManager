@@ -287,7 +287,16 @@ app.MapPost("/api/deploy", async (DeployRequest request, HttpContext context, IH
         try
         {
             if (File.Exists(tempZipPath)) File.Delete(tempZipPath);
-            if (Directory.Exists(tempExtractPath)) Directory.Delete(tempExtractPath, true);
+            if (Directory.Exists(tempExtractPath)) 
+            {
+                var dirInfo = new DirectoryInfo(tempExtractPath);
+                foreach (var info in dirInfo.GetFileSystemInfos("*", SearchOption.AllDirectories))
+                {
+                    info.Attributes = FileAttributes.Normal;
+                }
+                dirInfo.Attributes = FileAttributes.Normal;
+                Directory.Delete(tempExtractPath, true);
+            }
         }
         catch (Exception ex)
         {
