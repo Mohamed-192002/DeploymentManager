@@ -22,13 +22,29 @@ namespace DeploymentManager.Web.Controllers
         }
 
         // GET: Dashboard or /
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
+            // 1. Cleanup old records (> 7 days)
+            var weekAgo = DateTime.UtcNow.AddDays(-4);
+            await _context.Deployments
+                .Where(d => d.StartedAt < weekAgo)
+                .ExecuteDeleteAsync();
+
+            int pageSize = 6;
             var servers = await _context.Servers.ToListAsync();
+            
+            var totalDeployments = await _context.Deployments.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalDeployments / (double)pageSize);
+            
+            // Adjust page bounds
+            if (page < 1) page = 1;
+            if (page > totalPages && totalPages > 0) page = totalPages;
+
             var deployments = await _context.Deployments
                 .Include(d => d.Server)
                 .OrderByDescending(d => d.StartedAt)
-                .Take(10)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
             // Compute metrics
@@ -36,7 +52,10 @@ namespace DeploymentManager.Web.Controllers
             ViewBag.ActiveServers = servers.Count(s => s.Status == "Active");
             ViewBag.SuccessDeployments = await _context.Deployments.CountAsync(d => d.Status == "Success");
             ViewBag.FailedDeployments = await _context.Deployments.CountAsync(d => d.Status == "Failed");
+            
             ViewBag.RecentDeployments = deployments;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
 
             return View(servers);
         }
@@ -69,6 +88,7 @@ namespace DeploymentManager.Web.Controllers
                         deploymentId = d.Id.ToString(),
                         serverId = d.ServerId.ToString(),
                         serverName = d.Server != null ? d.Server.Name : "Unknown",
+                        iisSiteName = d.Server != null ? d.Server.IisSiteName : "Unknown",
                         status = d.Status,
                         startedAt = d.StartedAt.ToString("yyyy-MM-dd HH:mm:ss")
                     })

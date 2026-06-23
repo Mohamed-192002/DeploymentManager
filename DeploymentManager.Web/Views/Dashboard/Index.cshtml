@@ -4,7 +4,7 @@
     var recentDeployments = ViewBag.RecentDeployments as IEnumerable<DeploymentManager.Web.Models.Deployment> ?? new List<DeploymentManager.Web.Models.Deployment>();
 }
 
-<!-- قسم المؤشرات والإحصائيات -->
+@* <!-- قسم المؤشرات والإحصائيات -->
 <div class="row g-4 mb-4">
     <div class="col-md-3 col-sm-6">
         <div class="stat-card card-glass">
@@ -50,97 +50,104 @@
             </div>
         </div>
     </div>
+</div> *@
+
+<!-- قسم السيرفرات المستهدفة بعرض الشاشة -->
+<div class="card card-glass p-4 mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h4 class="fw-bold mb-1 text-gradient"><i class="bi bi-hdd-network-fill me-2"></i>السيرفرات المستهدفة</h4>
+        </div>
+        <div class="d-flex flex-wrap gap-3 align-items-center">
+            <div class="position-relative">
+                <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary-light"></i>
+                <input type="text" id="serverSearch" class="form-control ps-5 bg-dark bg-opacity-50 border-secondary border-opacity-25 text-white" placeholder="ابحث عن سيرفر...">
+            </div>
+            <a href="javascript:void(0);" id="selectAllServers" class="btn btn-outline-primary btn-sm fw-semibold">تحديد الكل</a>
+        </div>
+    </div>
+    
+    <form id="deployForm">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-4 border border-secondary border-opacity-10 rounded bg-black bg-opacity-20">
+                <i class="bi bi-hdd-stack-fill text-muted fs-2"></i>
+                <p class="text-secondary-light mb-0 mt-2">لا توجد سيرفرات مسجلة حالياً.</p>
+                <a asp-controller="Servers" asp-action="Create" class="btn btn-sm btn-primary-gradient mt-2">إضافة أول سيرفر</a>
+            </div>
+        }
+        else
+        {
+            <div class="row g-3" id="serverGrid" style="max-height: 400px; overflow-y: auto; overflow-x: hidden;">
+                @foreach (var server in Model)
+                {
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 server-option-item" data-search="@server.IisSiteName.ToLower() @server.Name.ToLower() @server.IpAddress.ToLower()">
+                        <input type="checkbox" name="serverIds" value="@server.Id" id="srv-@server.Id" class="server-checkbox-input d-none" />
+                        <label class="server-checkbox-label w-100 h-100" for="srv-@server.Id">
+                            <div class="server-checkbox-card p-3 h-100 d-flex flex-column justify-content-between gap-3">
+                                <div class="d-flex align-items-start justify-content-between">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="server-icon-wrapper" style="width: 40px; height: 40px;">
+                                            <i class="bi bi-globe"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold text-white fs-6 text-truncate" style="max-width: 100px;" title="@server.IisSiteName">@server.IisSiteName</div>
+                                            <span class="fs-7 text-secondary-light text-truncate d-block" style="max-width: 100px;" title="@server.Name - @server.IpAddress">@server.Name</span>
+                                        </div>
+                                    </div>
+                                    <div class="custom-check-indicator flex-shrink-0">
+                                        <i class="bi bi-check-lg"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-auto">
+                                    <span class="badge @(server.Status == "Active" ? "badge-success-glow" : "badge-danger-glow") px-2 py-1 fs-8">
+                                        @(server.Status == "Active" ? "نشط" : "غير نشط")
+                                    </span>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                }
+            </div>
+        }
+    </form>
 </div>
 
 <div class="row g-4">
-    <!-- لوحة بدء النشر (الجانب الأيمن) -->
+    <!-- لوحة بيانات النشر (الجانب الأيمن) -->
     <div class="col-lg-5">
-        <div class="card card-glass p-4 h-100">
-            <h4 class="fw-bold mb-3 text-gradient"><i class="bi bi-send-fill me-2"></i>بدء عملية نشر جديدة</h4>
-            <p class="text-secondary-light fs-7 mb-4">اختر السيرفرات المستهدفة وحدد بيانات الإصدار لبدء نشر الحزمة البرمجية بشكل متوازٍ في نفس الوقت.</p>
+        <div class="card card-glass p-4 h-100 d-flex flex-column">
+            <h4 class="fw-bold mb-3 text-gradient"><i class="bi bi-send-fill me-2"></i>بيانات النشر</h4>
+            <p class="text-secondary-light fs-7 mb-4">حدد رابط الحزمة البرمجية لبدء النشر على السيرفرات المحددة.</p>
             
-            <form id="deployForm">
-                <!-- اختيار السيرفرات -->
-                <div class="mb-4">
-                    <label class="form-label d-flex justify-content-between">
-                        <span>السيرفرات المستهدفة</span>
-                        <a href="javascript:void(0);" id="selectAllServers" class="text-primary text-decoration-none fs-7 fw-semibold">تحديد الكل</a>
-                    </label>
-                    
-                    @if (!Model.Any())
-                    {
-                        <div class="text-center py-4 border border-secondary border-opacity-10 rounded bg-black bg-opacity-20">
-                            <i class="bi bi-hdd-stack-fill text-muted fs-2"></i>
-                            <p class="text-secondary-light mb-0 mt-2">لا توجد سيرفرات مسجلة حالياً.</p>
-                            <a asp-controller="Servers" asp-action="Create" class="btn btn-sm btn-primary-gradient mt-2">إضافة أول سيرفر</a>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="server-select-list d-flex flex-column gap-2" style="max-height: 250px; overflow-y: auto; padding-left: 6px; padding-right: 2px;">
-                            @foreach (var server in Model)
-                            {
-                                <div class="server-option-item">
-                                    <input type="checkbox" name="serverIds" value="@server.Id" id="srv-@server.Id" class="server-checkbox-input d-none" />
-                                    <label class="server-checkbox-label w-100" for="srv-@server.Id">
-                                        <div class="server-checkbox-card p-3 d-flex align-items-center justify-content-between">
-                                            <div class="d-flex align-items-center gap-3">
-                                                <div class="server-icon-wrapper">
-                                                    <i class="bi bi-hdd-network-fill"></i>
-                                                </div>
-                                                <div>
-                                                    <div class="fw-semibold text-white fs-6">@server.Name</div>
-                                                    <span class="fs-7 text-secondary-light">@server.IpAddress</span>
-                                                </div>
-                                            </div>
-                                            <div class="d-flex align-items-center gap-3">
-                                                <span class="badge @(server.Status == "Active" ? "badge-success-glow" : "badge-danger-glow") px-2 py-1 fs-8">
-                                                    @(server.Status == "Active" ? "نشط" : "غير نشط")
-                                                </span>
-                                                <div class="custom-check-indicator">
-                                                    <i class="bi bi-check-lg"></i>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </label>
-                                </div>
-                            }
-                        </div>
-                    }
-                </div>
+            <!-- رابط الحزمة ZIP -->
+            <div class="mb-4">
+                <label for="packageUrl" class="form-label">رابط حزمة النشر (ZIP URL)</label>
+                <input type="url" class="form-control" id="packageUrl" name="packageUrl" 
+                       placeholder="https://storage/releases/1.0.0.zip" 
+                       value="http://localhost:5026/releases/sample-release.zip" required />
+                <span class="fs-8 text-secondary-light mt-1 d-block">يجب أن يحتوي ملف الـ ZIP على ملفات التطبيق التنفيذية في جذره مباشرة.</span>
+            </div>
 
-
-                <!-- رابط الحزمة ZIP -->
-                <div class="mb-4">
-                    <label for="packageUrl" class="form-label">رابط حزمة النشر (ZIP URL)</label>
-                    <input type="url" class="form-control" id="packageUrl" name="packageUrl" 
-                           placeholder="https://storage/releases/1.0.0.zip" 
-                           value="http://localhost:5026/releases/sample-release.zip" required />
-                    <span class="fs-8 text-secondary-light mt-1 d-block">يجب أن يحتوي ملف الـ ZIP على ملفات التطبيق التنفيذية في جذره مباشرة.</span>
-                </div>
-
-                <!-- زر بدء النشر -->
-                <button type="button" id="btnDeploy" class="btn btn-primary-gradient w-100 py-3 mt-2" @(Model.Any() ? "" : "disabled")>
-                    <i class="bi bi-rocket-takeoff-fill me-2 fs-5"></i> تنفيذ النشر المتوازي
-                </button>
-            </form>
+            <!-- زر بدء النشر -->
+            <button type="button" id="btnDeploy" class="btn btn-primary-gradient w-100 py-3 mt-auto" @(Model.Any() ? "" : "disabled")>
+                <i class="bi bi-rocket-takeoff-fill me-2 fs-5"></i> تنفيذ النشر المتوازي
+            </button>
         </div>
     </div>
 
     <!-- شاشة المراقبة وبث السجلات (الجانب الأيسر) -->
     <div class="col-lg-7">
         <div class="card card-glass p-4 h-100 d-flex flex-column">
-            <h4 class="fw-bold mb-3 text-gradient"><i class="bi bi-terminal-fill me-2"></i>شاشة المراقبة وبث السجلات</h4>
-            <p class="text-secondary-light fs-7 mb-4">اضغط على "عرض السجلات" لأي سيرفر جاري نشر الملفات عليه، لمراقبة تقدم العملية مباشرة من الـ Agent.</p>
-            
+            <h4 class="fw-bold mb-3 text-gradient"><i class="bi bi-terminal-fill me-2"></i>شاشة المراقبة وبث السجلات</h4>            
             <!-- جدول السيرفرات التي يجري النشر عليها حالياً -->
-            <div id="activeRunPanel" class="mb-4 d-none">
+            @* <div id="activeRunPanel" class="mb-4 d-none">
                 <h6 class="fw-bold text-white mb-2">السيرفرات قيد التشغيل الحالي</h6>
                 <div class="table-responsive">
                     <table class="table table-dark-custom align-middle">
                         <thead>
                             <tr>
-                                <th>السيرفر المستهدف</th>
+                                <th>الموقع المستهدف</th>
                                 <th>حالة النشر</th>
                                 <th class="text-end">السجلات</th>
                             </tr>
@@ -150,7 +157,7 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </div> *@
 
             <!-- الكونسول البرمجي -->
             <div class="flex-grow-1 d-flex flex-column">
@@ -177,7 +184,7 @@
                 <table class="table align-middle">
                     <thead>
                         <tr>
-                            <th>السيرفر</th>
+                            <th>الموقع والسيرفر</th>
                             <th>رابط الحزمة</th>
                             <th>وقت البدء</th>
                             <th>الحالة</th>
@@ -198,31 +205,34 @@
                             foreach (var dep in recentDeployments)
                             {
                                 <tr>
-                                    <td class="fw-semibold text-white">@(dep.Server?.Name ?? "سيرفر غير معروف")</td>
+                                    <td class="fw-semibold text-white">
+                                        <div title="@(dep.Server?.Name)">@(dep.Server?.IisSiteName ?? "موقع غير معروف")</div>
+                                        <small class="text-secondary-light">@(dep.Server?.Name ?? "سيرفر غير معروف")</small>
+                                    </td>
                                     <td class="text-truncate" style="max-width: 250px;"><a href="@dep.PackageUrl" target="_blank" class="text-info text-decoration-none fs-7">@dep.PackageUrl</a></td>
                                     <td class="text-secondary-light fs-7">@dep.StartedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</td>
                                     <td>
                                         @if (dep.Status == "Success")
                                         {
-                                            <span class="badge badge-success-glow px-2 py-1 fs-8">ناجح</span>
+                                            <span class="badge badge-success-glow px-2 py-1 fs-8 status-badge-@dep.Id">ناجح</span>
                                         }
                                         else if (dep.Status == "Failed")
                                         {
-                                            <span class="badge badge-danger-glow px-2 py-1 fs-8">فاشل</span>
+                                            <span class="badge badge-danger-glow px-2 py-1 fs-8 status-badge-@dep.Id">فاشل</span>
                                         }
                                         else if (dep.Status == "InProgress")
                                         {
-                                            <span class="badge badge-info-glow px-2 py-1 fs-8">
+                                            <span class="badge badge-info-glow px-2 py-1 fs-8 status-badge-@dep.Id">
                                                 <span class="status-pulse-inprogress me-1"></span> جاري النشر
                                             </span>
                                         }
                                         else
                                         {
-                                            <span class="badge badge-warning-glow px-2 py-1 fs-8">@dep.Status</span>
+                                            <span class="badge badge-warning-glow px-2 py-1 fs-8 status-badge-@dep.Id">@dep.Status</span>
                                         }
                                     </td>
                                     <td class="text-end">
-                                        <button class="btn btn-sm btn-outline-primary py-1 px-3 fs-8 load-history-log" data-id="@dep.Id" data-name="@(dep.Server?.Name)">
+                                        <button class="btn btn-sm btn-outline-primary py-1 px-3 fs-8 load-history-log" data-id="@dep.Id" data-site="@(dep.Server?.IisSiteName ?? "موقع غير معروف")">
                                             <i class="bi bi-eye-fill"></i> عرض السجلات
                                         </button>
                                     </td>
@@ -232,6 +242,28 @@
                     </tbody>
                 </table>
             </div>
+            
+            @if (ViewBag.TotalPages > 1)
+            {
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center" data-bs-theme="dark">
+                        <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                            <a class="page-link" href="?page=@(ViewBag.CurrentPage - 1)">السابق</a>
+                        </li>
+                        
+                        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                        {
+                            <li class="page-item @(ViewBag.CurrentPage == i ? "active" : "")">
+                                <a class="page-link" href="?page=@i">@i</a>
+                            </li>
+                        }
+
+                        <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                            <a class="page-link" href="?page=@(ViewBag.CurrentPage + 1)">التالي</a>
+                        </li>
+                    </ul>
+                </nav>
+            }
         </div>
     </div>
 </div>
@@ -265,7 +297,7 @@
 
             // استقبال تحديثات الحالة
             connection.on("UpdateDeploymentStatus", function(data) {
-                const statusCell = $(`#status-badge-${data.deploymentId}`);
+                const statusCell = $(`.status-badge-${data.deploymentId}`);
                 if (statusCell.length > 0) {
                     let badgeClass = "badge-warning-glow";
                     let badgeHtml = data.status;
@@ -331,7 +363,7 @@
                         delete pollingIntervals[deploymentId];
 
                         // تحديث الشارات مرئياً
-                        const statusCell = $(`#status-badge-${deploymentId}`);
+                        const statusCell = $(`.status-badge-${deploymentId}`);
                         if (statusCell.length > 0) {
                             if (success) {
                                 statusCell.removeClass("badge-info-glow badge-warning-glow").addClass("badge-success-glow").text("ناجح");
@@ -402,15 +434,16 @@
                             const row = `
                                 <tr>
                                     <td class="fw-semibold text-white">
-                                        ${dep.serverName} 
+                                        <div title="${dep.serverName}">${dep.iisSiteName}</div>
+                                        <small class="text-secondary-light">${dep.serverName}</small>
                                     </td>
                                     <td>
-                                        <span id="status-badge-${dep.deploymentId}" class="badge badge-info-glow px-2 py-1 fs-8">
+                                        <span class="badge badge-info-glow px-2 py-1 fs-8 status-badge-${dep.deploymentId}">
                                             <span class="status-pulse-inprogress me-1"></span> جاري النشر
                                         </span>
                                     </td>
                                     <td class="text-end">
-                                        <button class="btn btn-sm btn-primary-gradient py-1 px-3 fs-8 view-console-btn" data-id="${dep.deploymentId}" data-name="${dep.serverName}">
+                                        <button class="btn btn-sm btn-primary-gradient py-1 px-3 fs-8 view-console-btn" data-id="${dep.deploymentId}" data-site="${dep.iisSiteName}">
                                             <i class="bi bi-terminal"></i> عرض السجلات
                                         </button>
                                     </td>
@@ -419,7 +452,7 @@
                             $("#activeRunTableBody").append(row);
 
                             if (index === 0) {
-                                selectDeploymentForConsole(dep.deploymentId, dep.serverName);
+                                selectDeploymentForConsole(dep.deploymentId, dep.iisSiteName);
                             }
                         });
 
@@ -427,12 +460,15 @@
                         response.deployments.forEach(function(dep) {
                             const histRow = `
                                 <tr class="bg-primary bg-opacity-10">
-                                    <td class="fw-semibold text-white">${dep.serverName}</td>
+                                    <td class="fw-semibold text-white">
+                                        <div title="${dep.serverName}">${dep.iisSiteName}</div>
+                                        <small class="text-secondary-light">${dep.serverName}</small>
+                                    </td>
                                     <td class="text-truncate text-secondary" style="max-width: 250px;"><a href="${packageUrl}" target="_blank" class="text-info text-decoration-none fs-7">${packageUrl}</a></td>
                                     <td class="text-secondary-light fs-7">${dep.startedAt}</td>
-                                    <td><span id="status-badge-${dep.deploymentId}" class="badge badge-info-glow px-2 py-1 fs-8">جاري النشر</span></td>
+                                    <td><span class="badge badge-info-glow px-2 py-1 fs-8 status-badge-${dep.deploymentId}"><span class="status-pulse-inprogress me-1"></span> جاري النشر</span></td>
                                     <td class="text-end">
-                                        <button class="btn btn-sm btn-outline-primary py-1 px-3 fs-8 load-history-log" data-id="${dep.deploymentId}" data-name="${dep.serverName}">
+                                        <button class="btn btn-sm btn-outline-primary py-1 px-3 fs-8 load-history-log" data-id="${dep.deploymentId}" data-site="${dep.iisSiteName}">
                                             <i class="bi bi-eye-fill"></i> عرض السجلات
                                         </button>
                                     </td>
@@ -453,27 +489,27 @@
 
         $(document).on("click", ".view-console-btn", function() {
             const id = $(this).data("id");
-            const name = $(this).data("name");
-            selectDeploymentForConsole(id, name);
+            const site = $(this).data("site");
+            selectDeploymentForConsole(id, site);
         });
 
         $(document).on("click", ".load-history-log", function() {
             const id = $(this).data("id");
-            const name = $(this).data("name");
-            selectDeploymentForConsole(id, name, true); 
+            const site = $(this).data("site");
+            selectDeploymentForConsole(id, site, true); 
         });
 
         $("#btnClearConsole").click(function() {
             $("#terminalConsole").empty();
         });
 
-        function selectDeploymentForConsole(deploymentId, serverName, fetchFromDb = false) {
+        function selectDeploymentForConsole(deploymentId, siteName, fetchFromDb = false) {
             selectedDeploymentIdForConsole = deploymentId;
-            $("#consoleHeader").text(`المراقب: بث حي لسجلات [${serverName}]`);
-            $("#terminalConsole").empty().append(`<div class="terminal-line manager"><span class="terminal-timestamp">[النظام]</span>تم الاتصال بسجل السيرفر [${serverName}] وننتظر البيانات...</div>`);
+            $("#consoleHeader").text(`المراقب: بث حي لسجلات [${siteName}]`);
+            $("#terminalConsole").empty().append(`<div class="terminal-line manager"><span class="terminal-timestamp">[النظام]</span>تم الاتصال بسجل الموقع [${siteName}] وننتظر البيانات...</div>`);
 
             if (fetchFromDb) {
-                $("#consoleHeader").text(`المراقب: أرشيف سجلات [${serverName}]`);
+                $("#consoleHeader").text(`المراقب: أرشيف سجلات [${siteName}]`);
                 $.getJSON(`/Dashboard/GetDeploymentLogs/${deploymentId}`, function(logs) {
                     if (logs.length === 0) {
                         $("#terminalConsole").append(`<div class="terminal-line warning"><span class="terminal-timestamp">[النظام]</span>لا توجد سجلات محفوظة لهذه العملية.</div>`);
@@ -493,11 +529,7 @@
             else if (message.includes("[IIS Simulation]") || message.includes("[IIS]")) logClass = "warning";
             else if (message.includes("[Manager]") || message.includes("[النظام]")) logClass = "manager";
 
-            const logElement = $(`
-                <div class="terminal-line ${logClass}">
-                    <span class="terminal-timestamp">[${timeFormatted}]</span>${escapeHtml(message)}
-                </div>
-            `);
+            const logElement = $(`<div class="terminal-line ${logClass}"><span class="terminal-timestamp">[${timeFormatted}]</span>${escapeHtml(message)}</div>`);
             $("#terminalConsole").append(logElement);
             
             const consoleElement = document.getElementById("terminalConsole");
@@ -520,6 +552,19 @@
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#039;");
         }
+
+        // خاصية البحث في السيرفرات
+        $("#serverSearch").on("input", function() {
+            const searchTerm = $(this).val().toLowerCase().trim();
+            $(".server-option-item").each(function() {
+                const searchData = $(this).data("search") || "";
+                if (searchData.includes(searchTerm)) {
+                    $(this).removeClass("d-none");
+                } else {
+                    $(this).addClass("d-none");
+                }
+            });
+        });
     });
 </script>
 }
